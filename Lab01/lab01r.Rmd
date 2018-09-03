@@ -23,9 +23,9 @@ Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos.
 
 Antes de tudo, será importado a nossa base de dados.
 ```{r}
-dadosCEAP <- read.csv("/Users/mattheusbrito/git/AD2/Lab01/dados/dadosCEAP.csv")
+dadosCEAP <- read.csv("/Users/mattheusbrito/Downloads/AD2/dadosCEAP.csv")
 dadosCEAP$valorGlosa <- as.numeric(sub(",", ".", dadosCEAP$valorGlosa, fixed = TRUE))
-dadosLimiteCEAP <- read.csv("/Users/mattheusbrito/git/AD2/Lab01/dados/limiteMensalCEAP.csv")
+dadosLimiteCEAP <- read.csv("/Users/mattheusbrito/Downloads/AD2/limiteMensalCEAP.csv")
 dadosCEAP %>% full_join(dadosLimiteCEAP, by=c("sgUF" = "UF")) -> dadosCEAP
 ```
 
@@ -75,7 +75,7 @@ parlamentaresMenos %>%
 *Para responder a segunda pergunta, é preciso somar as despesas gastas no exterior agrupando por estado segundo a CEAP. Para assim ser possível responder quais os estados que mais gastam no exterior*
 
 ```{r results=FALSE}
-mapa <- readOGR("/Users/mattheusbrito/git/AD2/Lab01/mapa/BRUFE250GC_SIR.shp")
+mapa <- readOGR("/Users/mattheusbrito/Downloads/AD2/mapa/BRUFE250GC_SIR.shp")
 ```
 
 ```{r}
