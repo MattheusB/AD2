@@ -38,6 +38,7 @@ dadosCEAP %>% full_join(dadosLimiteCEAP, by=c("sgUF" = "UF")) -> dadosCEAP
 ```{r}
 parlamentaresMais <- dadosCEAP %>%
   group_by(nomeParlamentar) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido)) %>%
   na.omit()
 
@@ -52,11 +53,12 @@ parlamentaresMais %>%
   
 ```
 
-*O gráfico acima mostra os 10 parlamentares que mais gastaram dinheiro da CEAP, sendo assim, pode-se notar que a variância entre os valores é ínfima. Variando apenas 0.08M aproximadamente e destacando o parlamentar Edio Lopes que 1.48M em reais do dinheiro da CEAP.*
+*O gráfico acima mostra os 10 parlamentares que mais gastaram dinheiro da CEAP, sendo assim, pode-se notar que a variância entre os valores é ínfima. Variando apenas 0.19M aproximadamente e destacando o parlamentar Edio Lopes que 1.64M em reais do dinheiro da CEAP.*
 
 ```{r}
 parlamentaresMenos <- dadosCEAP %>%
   group_by(nomeParlamentar) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido)) %>%
   filter(totalGasto > 0) %>%
   na.omit()
@@ -68,7 +70,7 @@ parlamentaresMenos %>%
          yaxis = list(title ="Valor (em R$) gasto", range= c(0,10)))
 
 ```
-*O parlamentar que menos gastou foi o Camilo Cola, seguido por Marcio Monteiro e Marcelo Almeira. Após a análise desse gráfico podemos afirmar que a diferença entre Camilo e Marcio é significativa, devido ao fato de que por mais que os valores não sejam tão altos comparados ao gráfico anterior, ainda é uma grande diferença olhando pelo lado porporcional.*
+*O parlamentar que menos gastou foi o Camilo Cola, seguido por Eliseu Padilha e Marcio Monteiro. Após a análise desse gráfico podemos afirmar que a diferença entre Camilo e Eliseu é significativa, devido ao fato de que por mais que os valores não sejam tão altos comparados ao gráfico anterior, ainda é uma grande diferença olhando pelo lado porporcional.*
 
 #### 2 - Quais os estados cujos deputados gastam mais no exterior? Quais os estados cujos deputados gastam menos no exterior?
 
@@ -83,6 +85,7 @@ mapa@data$sgUF <- c("AC", "AL", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MT", 
 
 dadosEstados <- dadosCEAP %>%
   group_by(sgUF) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(valorGasto = sum(valorLíquido))
   
   
@@ -95,6 +98,7 @@ mapa@data <- mapa@data %>%
 gastosExterior <- dadosCEAP %>%
   filter(tipoDocumento == 2) %>%
   group_by(sgUF) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(exteriorGastos = sum(valorLíquido))
 
 mapa@data <- mapa@data %>%
@@ -129,6 +133,7 @@ mapa %>%
 gastosPartidosPB <- dadosCEAP %>%
   filter(sgUF == "PB") %>%
   group_by(sgPartido) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido), vezesGasto = n())
 ```
 ```{r}
@@ -137,7 +142,7 @@ gastosPartidosPB %>%
   layout(margin = list(l = 150),
          yaxis = list (title = ""))
 ```
-*No primeiro gráfico, o partido que mais fez uso do dinheiro da CEAP foi o PMDB, que fez uso 4052 vezes. Sendo uma diferença significativa para os outros partidos onde o que mais se aproxima foi o PP que fez uso 2156 vezes que equivale a um pouquinho mais da metade das vezes que o PMDB utilizou.*
+*No primeiro gráfico, o partido que mais fez uso do dinheiro da CEAP foi o PMDB, que fez uso 3863 vezes. Sendo uma diferença significativa para os outros partidos onde o que mais se aproxima foi o PP que fez uso 1990 vezes que equivale a um pouquinho mais da metade das vezes que o PMDB utilizou.*
 
 ```{r}
 gastosPartidosPB %>%
@@ -145,7 +150,7 @@ gastosPartidosPB %>%
   layout(margin = list(l = 150),
          yaxis = list (title = ""))
 ```
-*No segundo gráfico, o partido que mais gastou dinheiro da CEAP foi também o PMDB, que gastou  aproximadamente 4 milhões de reais. Novamente vemos uma boa diferença em relação aos outros partidos que dessa vez o que mais se aproxima é o PSD que não fez uso sequer da metade da quantidade que o Partido do Movimento Democrático Brasileiro.*
+*No segundo gráfico, o partido que mais gastou dinheiro da CEAP foi também o PMDB, que gastou  aproximadamente 4 milhões de reais. Novamente vemos uma boa diferença em relação aos outros partidos que dessa vez o que mais se aproxima é o PR que não fez uso sequer da metade da quantidade que o Partido do Movimento Democrático Brasileiro.*
 
 #### 4 - Quais os deputados que mais ultrapassam o limite de CEAP do seu estado?
 
@@ -155,6 +160,7 @@ excedemLimite <- dadosCEAP %>%
   mutate(ano = substr(dataEmissao, 1, 4)) %>%
   mutate(mes = substr(dataEmissao, 6, 7)) %>%
   group_by(nomeParlamentar, limite_mensal, ano, mes) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido)) %>%
   filter(totalGasto > limite_mensal) %>%
   na.omit()
@@ -173,12 +179,13 @@ excedemLimite %>%
   
   
 ```
-*Observando o gráfico vemos que Eduardo Barbosa foi o parlamentar que ultrapassou mais vezes o limite mensal do seu estado, seguido por Rômulo Gouveia e Nelson Marquezelli, sendo 21, 20 e 19 o número de vezes, respectivamente.*
+*Observando o gráfico vemos que Felipe Bornier foi o parlamentar que ultrapassou mais vezes o limite mensal do seu estado, seguido por Domingos Neto e Jandira Feghali, sendo 26, 22 e 22 o número de vezes, respectivamente.*
 ```{r}
 excedemLimite <- dadosCEAP %>%
   mutate(ano = substr(dataEmissao, 1, 4)) %>%
   mutate(mes = substr(dataEmissao, 6, 7)) %>%
   group_by(nomeParlamentar, limite_mensal, ano, mes) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido)) %>%
   filter(totalGasto > limite_mensal) %>%
   na.omit()
@@ -195,14 +202,15 @@ excedemLimite %>%
          xaxis=list(title="Parlamentar", range= c(0,10)), 
          yaxis=list(title="Valores (em R$) ultrapassada"), barmode="stack")
 ```
-*Apesar do primeiro gráfico mostrar o número de vezes que cada deputado ultrapassou o limite mensal do seu estado, muitos dos parlamentares que estão cabeçando o gráfico anterior não aparecem nesse acima, exceção de alguns como Rômulo Gouveia por exemplo. Pelo outro lado, vemos parlamentares que não estão presentes no primeiro gráfico mas ficam numa posição bem colocada no segundo, como por exemplo o deputado Zé Geraldo.*
+*Apesar do primeiro gráfico mostrar o número de vezes que cada deputado ultrapassou o limite mensal do seu estado, muitos dos parlamentares que estão cabeçando o gráfico anterior não aparecem nesse acima, exceção de alguns como Felipe Bornier e Rômulo Gouveia por exemplo. Pelo outro lado, vemos parlamentares que não estão presentes no primeiro gráfico mas ficam numa posição bem colocada no segundo, como por exemplo o deputado Zé Geraldo.*
 
 #### 5 - Quais estados cujos parlamentares gastam mais com passagens aéreas?
 
 ```{r}
 gastosPassagens <- dadosCEAP %>%
-  filter(tipoDespesa == "PASSAGENS AÉREAS") %>%
+  filter(tipoDespesa == "Emissão Bilhete Aéreo") %>%
   group_by(sgUF) %>%
+  filter(valorLíquido > 0) %>%
   summarise(totalPassagens = sum(valorLíquido)) %>%
   na.omit()
 
@@ -212,7 +220,7 @@ gastosPassagens %>%
          yaxis = list(title = "Parlamentar"),
          xaxis = list (title = "Total gasto (em R$) com passagens aéreas"))
 ```
-*O estado que mais gasta com passagens aéreas é São Paulo, resultando em um total de R$ 901245 aproximadamente, seguido pelo estado de Amazonas com um total de R$ 638953 aproximadamente*
+*O estado que mais gasta com passagens aéreas é São Paulo, resultando em um total de 23 milhões de reais aproximadamente, seguido pelo estado do Rio de Janeiro com um total de 17 milhões de reais aproximadamente*
 
 #### 6 - Escolha três partidos e responda: Quais são os tipos de despesa mais utilizados no uso da CEAP pelos deputados desses partidos? Mesma pergunta considerando valores em R$.
 
@@ -240,6 +248,7 @@ partidos <- dadosCEAP %>%
 
 tipoGastos <- partidos %>%
   group_by(tipoDespesa) %>%
+  filter(valorLíquido >= 0) %>%
   summarise(totalGasto = sum(valorLíquido))
 tipoGastos %>%
 plot_ly(y = ~reorder(tipoDespesa,totalGasto), x = ~totalGasto, type = "bar", color = ~tipoDespesa) %>%
@@ -247,5 +256,5 @@ plot_ly(y = ~reorder(tipoDespesa,totalGasto), x = ~totalGasto, type = "bar", col
          yaxis = list(title = "Tipo de Despesa"),
          xaxis = list (title = "Total gasto (em R$)"), showlegend = FALSE)
 ```
-*Como esperado o tipo de despesa que gerou mais gasto (em R$) foi o de Emissão de Bilhete Aéreo, dando uma despesa de R$ 45242357 aproximadamente*
+*Como esperado o tipo de despesa que gerou mais gasto (em R$) foi o de Emissão de Bilhete Aéreo, dando uma despesa de R$ 53043308 aproximadamente e o que gerou menos gastos foi o de Locação ou fretamento de embarcações gerando apenas uma despesa de R$ 25163 aproximadamente.*
 
