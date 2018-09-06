@@ -1,0 +1,136 @@
+---
+title: "Gasto de Parlamentares - Parte 2"
+author: "Mattheus Brito Rodrigues"
+date: "06/09/2018"
+output: html_document
+---
+
+# Introdução
+Esta análise explanatória será feita utilizando dados sobre as despesas de deputados federais da legislatura atual com a atividade parlamentar.
+Logo abaixo será respondido 2 perguntas tomando como base os dados fornecidos.
+
+
+Antes de tudo, será importado as nossas bibliotecas que serão utilizadas para a plotagem dos gráficos para responder as perguntas.
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(plotly)
+library(dplyr)
+
+```
+
+Logo após, será importado a nossa base de dados.
+
+```{r}
+dadosCEAP <- read.csv("/Users/mattheusbrito/Downloads/AD2/dadosCEAP.csv")
+dadosCEAP$valorGlosa <- as.numeric(sub(",", ".", dadosCEAP$valorGlosa, fixed = TRUE))
+dadosLimiteCEAP <- read.csv("/Users/mattheusbrito/Downloads/AD2/limiteMensalCEAP.csv")
+dadosCEAP %>% full_join(dadosLimiteCEAP, by=c("sgUF" = "UF")) -> dadosCEAP
+```
+
+Antes de partir para as perguntas, é preciso entender o que cada coluna da nossa base de dados significa:
+
+  * nomeParlamentar: Nome adotado pelo Parlamentar ao tomar posse do seu mandato.
+  * idCadastro: Número que identifica unicamente um deputado federal na CD.
+  * sgUF: No contexto da cota CEAP, representa a unidade da federação pela qual o deputado foi eleito e é utilizada para definir o valor da cota a que o deputado tem.
+  * sgPartido: Sigla do partido do parlamentar. 
+  * tipoDespesa: O seu conteúdo é a descrição do Tipo de Despesa relativo à despesa em questão.
+  * especDespesa: Representa a descrição  especificação mais detalhada de um referido Tipo de Despesa.
+  * fornecedor: O conteúdo deste dado representa o nome do fornecedor do produto ou serviço presente no documento fiscal
+  * CNPJCPF: O conteúdo deste dado representa o CNPJ ou o CPF do emitente do documento fiscal, quando se tratar do uso da cota em razão do reembolso despesas comprovadas pela emissão de documentos fiscais.
+  * tipoDocumento: Este dado representa o tipo de documento do fiscal – 0 (Zero), para Nota Fiscal; 1 (um), para Recibo; e 2, para Despesa no Exterior.
+  * dataEmissao: O conteúdo deste dado é a data de emissão do documento fiscal ou a data do documento que tenha dado causa à despesa.
+  * valorDocumento: O seu conteúdo é o valor de face do documento fiscal ou o valor do documento que deu causa à despesa. Quando se tratar de bilhete aéreo, esse valor poderá ser negativo, significando que o referido bilhete é um bilhete de compensação, pois compensa um outro bilhete emitido e não utilizado pelo deputado (idem para o dado vlrLiquido abaixo).
+  * valorGlosa: O seu conteúdo representa o valor da glosa do documento fiscal que incidirá sobre o Valor do Documento, ou o valor da glosa do documento que deu causa à despesa.
+  * valorLiquido: O seu conteúdo representa o valor líquido do documento fiscal ou do documento que deu causa à despesa e será calculado pela diferença entre o Valor do Documento e o Valor da Glosa. É este valor que será debitado da cota do deputado. Caso o débito seja do Tipo Telefonia e o valor seja igual a zero, significa que a despesa foi franqueada.
+
+
+# Perguntas
+
+#### 1 - Quais os meses cujos parlamentares mais usam CEAP? Quais são os que menos usam? Mesmas perguntas considerando valores em R$.
+
+*Para responder a pergunta acima, teremos que agrupar os dados por mês e somar as despesas de cada mês segundo a CEAP para assim concluir quais os meses em que houve mais gasto e os que houve menos gasto dinheiro da CEAP*
+```{r}
+gastoMes <- dadosCEAP %>%
+mutate(mes = substr(dataEmissao, 6, 7)) %>%
+  group_by(mes) %>%
+  filter(valorLíquido >= 0) %>%
+  summarise(totalGasto = sum(valorLíquido), vezesGasto = n()) %>%
+  na.omit()
+
+```
+
+*Dessa forma, para afirmar qual o mês que mais teve mais gasto em questão de quantidade de gastos deve-se calcular quantas vezes houve gasto em cada mês. Plotando um gráfico de linhas com pontos, sendo x = mês do gasto e y = quantidade total do gasto. Levando em conta que: 01 = Janeiro, 02 = Fevereiro, 03 = Março, 04 = Abril, 05 = Maio, 06 = Junho, 07 = Julho, 08 = Agosto, 09 = Setembro, 10 = Outubro, 11 = Novembro e 12 = Dezembro*
+```{r}
+gastoMes <- gastoMes[order(gastoMes$vezesGasto, decreasing = TRUE),]
+gastoMes$indexGasto <- factor(gastoMes$mes, levels = gastoMes$mes)
+
+gastoMes %>%
+  plot_ly(x= ~indexGasto, y= ~vezesGasto,type= "scatter", mode= "lines+markers") %>%
+  layout(title="Quantidade de gastos em cada mês", 
+         xaxis=list(title="Mês"), 
+         yaxis=list(title="Quantidade de vezes que ocorreu gasto"), barmode="stack")
+
+```
+
+*Após observar o gráfico, pode-se afirmar que o mês em que houve mais gasto de dinheiro da CEAP geralmente é Março, teve um total de 98 mil gastos. Já o mês que ocorreu menos gasto foi o de Janeiro, sendo gasto uma quantidade de 50 mil gastos. O que é sucetível, pois em Janeiro geralmente há mudança de parlamentares na Câmara, então há menos gastos devido à essa troca.*
+
+
+*Por outro lado, para afirmar qual o mês que mais teve mais gasto em questão de valores de gastos deve-se calcular a soma do gasto em cada mês. Plotando um gráfico de barras, sendo x = mês do gasto e y = valor total do gasto. Levando em conta que: 01 = Janeiro, 02 = Fevereiro, 03 = Março, 04 = Abril, 05 = Maio, 06 = Junho, 07 = Julho, 08 = Agosto, 09 = Setembro, 10 = Outubro, 11 = Novembro e 12 = Dezembro. Tendo cara mês diferenciado pela sua cor.*
+
+```{r}
+gastoMes <- gastoMes[order(gastoMes$totalGasto, decreasing = TRUE),]
+gastoMes$indexGasto <- factor(gastoMes$mes, levels = gastoMes$mes)
+
+gastoMes %>%
+  plot_ly(x=~indexGasto, y =~totalGasto, type="bar", color = ~mes) %>%
+  layout(title = "Gastos (em R$) em cada mês",
+         xaxis = list(title="Mês"),
+         yxaxis = list(title="Valor (em R$) gasto"))
+```
+*Já utilizando como base os valores dos gastos, vimos que Março continua no topo dos meses que há mais gasto, seguido de maio. O que era de se esperar visto o primeiro gráfico plotado. Já nos meses onde há menos gastos Janeiro continua como mês mais "econômico", mas vimos que Dezembro deixa de ser o 11º colocado para ser o 7º. Ou seja, por mais que Dezembro tenha poucos gastos, os seus valores são altos.*
+
+
+
+#### 2 - Quais os fornecedores cujos parlamentares mais usam CEAP? Mesma pergunta considerando valores em R$.
+
+*Para responder a pergunta acima, teremos que agrupar os dados por fornecedor e somar as despesas de cada fornecedor segundo a CEAP para assim concluir quais os fornecedores em que houve mais uso pelos parlamentares com dinheiro da CEAP*
+
+```{r}
+gastoFornecedores <- dadosCEAP %>%
+  group_by(fornecedor) %>%
+  filter(valorLíquido >= 0) %>%
+  summarise(vezesGasto = n(), totalGasto = sum(valorLíquido)) %>%
+  na.omit()
+
+```
+
+
+*Sendo assim, para responder quais os fornecedores que mais forneceram aos parlamentares, deve-se calcular quantas vezes houve fornecimento por cada fornecedor. Plotando um gráfico de barras, sendo x = fornecedor do gasto e y = quantidade de fornecimentos.*
+```{r}
+gastoFornecedores <- gastoFornecedores[order(gastoFornecedores$vezesGasto, decreasing = TRUE),]
+gastoFornecedores$indexGasto <- factor(gastoFornecedores$fornecedor, levels = gastoFornecedores$fornecedor)
+
+
+gastoFornecedores %>%
+  plot_ly(x=~indexGasto, y =~vezesGasto, type="bar") %>%
+  layout(title = "Fornecedores que mais forneceram para os gastos do dinheiro da CEAP",
+         xaxis = list(title="Fornecedor", range= c(0,10)),
+         yxaxis = list(title="Vezes em que houve gasto", range = c(0,10)))
+```
+
+*Após a plotagem do esboço, pode-se afirmar que os primeiros fornecedores em que houve mais gasto de dinheiro da CEAP todos são Companhias Aéreas. O que já era de se esperar visto que os maiores gastos dos parlamentares são com passagens aéreas.*
+
+*Para finalizar, agora considerando os valores (em R$). Deve-se calcular a soma de cada gasto por fornecedor.* 
+```{r}
+gastoFornecedores <- gastoFornecedores[order(gastoFornecedores$totalGasto, decreasing = TRUE),]
+gastoFornecedores$indexGasto <- factor(gastoFornecedores$fornecedor, levels = gastoFornecedores$fornecedor)
+
+
+gastoFornecedores %>%
+  plot_ly(x=~indexGasto, y =~totalGasto, type="bar") %>%
+  layout(title = "Fornecedores que mais forneceram gastos da CEAP",
+         xaxis = list(title="Fornecedor", range= c(0,10)),
+         yxaxis = list(title="Valor gasto (em R$) pelos fornecedores", range = c(0,10)))
+```
+*Por outro lado, utilizando como base os valores dos gastos, podemos ver que as companhias aéreas continuam no topo da lista de fornecedores onde se concentram os maiores gastos do dinheiro da CEAP. O resultado é o esperado, pois além de ter como base o gráfico anterior, ainda há o fato de que coisas relacionadas à aviões custam caro.*
