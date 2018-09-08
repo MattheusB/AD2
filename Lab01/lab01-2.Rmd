@@ -12,8 +12,8 @@ Logo abaixo será respondido 2 perguntas tomando como base os dados fornecidos.
 
 Antes de tudo, será importado as nossas bibliotecas que serão utilizadas para a plotagem dos gráficos para responder as perguntas.
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```{r}
+knitr::opts_chunk$set(warning = FALSE)
 library(plotly)
 library(dplyr)
 
