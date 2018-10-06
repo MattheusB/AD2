@@ -1,0 +1,57 @@
+---
+title: "Votação Deputados"
+author: "Mattheus Brito Rodrigues"
+date: "06/10/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(Amelia)
+library(dplyr)
+library(tidyverse)
+```
+
+```{r}
+eleicoes2006 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006.csv")
+eleicoes2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2010.csv")
+eleicoes2006_2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006_e_2010.csv")
+```
+
+```{r}
+missmap(eleicoes2006)
+missmap(eleicoes2010)
+missmap(eleicoes2006_2010)
+```
+
+
+```{r}
+eleicoes2006_rm <- eleicoes2006 %>%
+   select(-c(cargo))
+```
+
+
+```{r}
+eleicoes2006_rm <- eleicoes2006_rm %>%
+  select(~c(sequencial_candidato, nome))
+```
+
+
+```{r}
+model <- lm(votos~., data = eleicoes2006_rm)
+```
+
+```{r}
+glance(model)
+```
+
+```{r}
+anova(model)
+```
+
+```{r}
+eleicoes2006_rm <- eleicoes2006_rm %>%
+  select(-c(quantidade_doadores, estado_civil))
+```
+
