@@ -4,6 +4,10 @@ author: "Mattheus Brito Rodrigues"
 date: "06/10/2018"
 output: html_document
 ---
+# Introdução
+Esta análise será feita utilizando dados sobre as votações que candidatos à Câmara Federal de Deputados receberam nos anos de 2006 e 2010. Desse modo, será utilizado Regressão Linear para explicar essas votações. Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos
+
+Antes de tudo, será importado as nossas bibliotecas que serão utilizadas para a plotagem das análises para responder as perguntas.
 
 ```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -15,90 +19,249 @@ library(broom)
 library(GGally)
 ```
 
-# Introdução
-
+Logo após, será importado a nossa base de dados, sendo elas: eleicoes2006 (dados das eleições de 2006), eleicoes2010 (dados das eleições de 2010) e por fim eleicoes2006_2010 (dados das eleições de 2006 e 2010).
 ```{r}
 eleicoes2006 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006.csv")
 eleicoes2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2010.csv")
 eleicoes2006_2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006_e_2010.csv")
 ```
 
+Antes de partir para as perguntas, é necessário entender o que cada coluna da nossa base de dados significa:
+
+* "sequencial_candidato" :(character) id do candidato
+* "nome": (character)
+* "uf": (character)
+* "partido": (character)
+* "quantidade_doacoes": (integer)
+* "quantidade_doadores": (integer) número de doadores diferentes
+* "total_receita": (double) soma em R$ das doações
+* "media_receita": (double) média das doações
+* "recursos_de_outros_candidatos/comites": (double) quantia em R$ das doações provenientes de outros candidatos ou comite partidário
+* "recursos_de_pessoas_fisicas": (double) quantia em R$ das doações provenientes de outros CPFs
+* "recursos_de_pessoas_juridicas": (double) quantia em R$ das doações provenientes de outros CNPJ
+* "recursos_proprios": (double) quantia em R$ das doações provenientes do próprio candidato
+* "recursos_de_partido_politico": (double) quantia em R$ das doações provenientes do partido político do candidato
+* "votos": (integer) variável alvo. Se refere ao número de votos na campanha de 2006 e 2010
+* "quantidade_despesas": (integer)
+* "quantidade_fornecedores": (integer) número de fornecedores/despesas diferentes
+* "total_despesa": (double) soma em R$ das despesas de campanha
+* "media_despesa": (double) média das despesas de campanha
+* "cargo": (character)
+* "Sexo":  (character)
+* "grau": (character) grau de instrução do candidato
+* "estado_civil": (character)
+* "ocupacao": (character) ocupação do candidato
 
 
+Após entender as variáveis disponíveis, será feito uma verificação se há ausência de dados nas tabelas:
+* 2006
 ```{r}
 missmap(eleicoes2006)
+```
+
+* 2010
+```{r}
 missmap(eleicoes2010)
+```
+
+*2006 e 2010
+missmap(eleicoes2006_2010)
+```{r}
 missmap(eleicoes2006_2010)
 ```
 
-# Questão 01
+Através dos três gráficos acima, pode-se confirmar que não há nenhum dado faltando nas três tabelas. Sendo assim, podemos seguir em frente com a nossa análise.
+
+# Perguntas
+
+#### 1 - Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
+
+* 2006
+Não, pois algumas variáveis que estão nos dados evidentemente não possuem relação como o número de votos e também são categoricas. Por esse motivo as seguintes variáveis foram removidas:
+
+* cargo
+* sequencial_candidato
+* nome
+
 ```{r}
 eleicoes2006_rm <- eleicoes2006 %>%
-   select(-c(cargo))
+   select(-c(cargo, sequencial_candidato, nome))
+```
+
+Mesmo assim, ainda podem existir variáveis que não são boas preditoras, mas que não foram retiradas. Desse modo, gerou-se um modelo para verificar isso tornando possível observar a importância de cada variável no modelo resultante
+```{r}
+modelo2006 <- lm(votos~., data = eleicoes2006_rm)
 ```
 
 
 ```{r}
-eleicoes2006_rm <- eleicoes2006_rm %>%
-  select(-c(sequencial_candidato, nome))
+glance(modelo2006)
+```
+No momento, é interessante que se atente à variável "r.squared" que tem o valor de 0.5778645.
+
+```{r}
+anova(modelo2006)
+```
+Após analisar a tabela acima, pode-se notar que algumas variáveis tem p-valor > 0.05, dessa forma, não tem muita significância para o nosso modelo de dados, são elas:
+* recursos_de_outros_candidatos
+* quantidade_fornecedores
+* media_despesa
+* sexo
+* grau
+* estado_civil
+
+Sendo assim, é possível afirmar que um modelo de regressão linear com todas as variáveis não é plausível para explicar a variação do número de votos em 2006.
+
+* 2010
+Não, pois algumas variáveis que estão nos dados evidentemente não possuem relação como o número de votos e também são categoricas. Por esse motivo as seguintes variáveis foram removidas:
+
+* cargo
+* sequencial_candidato
+* nome
+
+```{r}
+eleicoes2010_rm <- eleicoes2010 %>%
+   select(-c(cargo, sequencial_candidato, nome))
+```
+
+Mesmo assim, ainda podem existir variáveis que não são boas preditoras, mas que não foram retiradas. Desse modo, gerou-se um modelo para verificar isso tornando possível observar a importância de cada variável no modelo resultante
+```{r}
+modelo2010 <- lm(votos~., data = eleicoes2010_rm)
 ```
 
 
 ```{r}
-modelo <- lm(votos~., data = eleicoes2006_rm)
+glance(modelo2010)
 ```
+No momento, é interessante que se atente à variável "r.squared" que tem o valor de 0.5405282.
 
 ```{r}
-glance(modelo)
+anova(modelo2010)
 ```
+Após analisar a tabela acima, pode-se notar que algumas variáveis tem p-valor > 0.05, dessa forma, não tem muita significância para o nosso modelo de dados, são elas:
+* recursos_de_partido_politico
+* quantidade_fornecedores
+* sexo
+
+Sendo assim, é possível afirmar que um modelo de regressão linear com todas as variáveis não é plausível para explicar a variação do número de votos em 2010.
+
+
+
+#### 2 - Compare as regressões construídas para 2006 e 2010. Quais as diferenças/semelhanças percebidas? Algumas sugestões:
+
+#### 2.1 - Analise os plots de resíduos e verifique se há tendências nos erros para cada ano.
+
+* 2006
 
 ```{r}
-anova(modelo)
-```
-
-
-
-# Questão 02.1
-
-```{r}
-modeloFiltrado <- lm(votos~., data=eleicoes2006_rm)
-```
-
-
-```{r}
-ggplot(modeloFiltrado, aes(x = predict(modeloFiltrado), y = residuals(modeloFiltrado))) +
+ggplot(modelo2006, aes(x = predict(modelo2006), y = residuals(modelo2006))) +
   geom_point(color= "darkblue") + 
   xlab("Predict") + 
   ylab("Residuals")
   
 ```
+Após a plotagem do gráfico, percebemos que os resíduos são assimétrico e que por mais que tenha alguns pontos distantes, ainda há uma aglomeração que significa um padrão de comportamento, ou seja, não são aleatórios. Isso significa que o modelo não é ideal e que faltam transformações ou interações entre as variáveis.
 
-
-# Questão 02.2
+* 2010
 
 ```{r}
-anova(modeloFiltrado)
+ggplot(modelo2010, aes(x = predict(modelo2010), y = residuals(modelo2010))) +
+  geom_point(color= "darkred") + 
+  xlab("Predict") + 
+  ylab("Residuals")
+  
+```
+Após a plotagem do gráfico, percebemos que os resíduos são assimétrico e que por mais que tenha alguns pontos distantes, ainda há uma aglomeração que significa um padrão de comportamento, ou seja, não são aleatórios. Isso significa que o modelo não é ideal e que faltam transformações ou interações entre as variáveis.
+
+
+# 2.2 - Quais variáveis conseguem explicar melhor o número de votos? Compare essas variáveis entre os modelos. Mesma coisa para as variáveis menos explicativas.
+Para responder a pergunta utilizaremos os valores de R² para comparar os modelos.
+
+* 2006
+
+```{r}
+eleicoes2006_melhor <- eleicoes2006_rm %>%
+  select(-uf)
+
+modeloMelhorado2006 <- lm(votos~., data = eleicoes2006_melhor)
+
+glance(modeloMelhorado2006)
+```
+No modelo acima foi retirado a variável "uf" que tem bastante significância  para o modelo.
+
+```{r}
+eleicoes2006_pior <- eleicoes2006_rm %>%
+  select(-sexo)
+
+modeloPiorado2006 <- lm(votos~., data = eleicoes2006_pior)
+
+glance(modeloPiorado2006)
+```
+No modelo acima foi retirado a variável "sexo" que tem pouca significância  para o modelo.
+
+```{r}
+glance(modelo2006)
+diferenca1 = glance(modelo2006)$adj.r.squared - glance(modeloMelhorado2006)$adj.r.squared
+diferenca2 = glance(modelo2006)$adj.r.squared - glance(modeloPiorado2006)$adj.r.squared
 ```
 
+Observamos que a diferença do valor do R² ajustado é de `r round(diferenca1,3)` entre o primeiro modelo e o modelo original, já a diferença entre o segundo modelo e o original é de `r round(diferenca2,3)`, logo podemos dizer que quando retira a variável "uf" temos mudanças mais significantes, do que quando retira-se a variável "sexo".
 
-# Questão 02.3
+* 2010
+
+```{r}
+eleicoes2010_melhor <- eleicoes2010_rm %>%
+  select(-partido)
+
+modeloMelhorado2010 <- lm(votos~., data = eleicoes2010_melhor)
+
+glance(modeloMelhorado2010)
+```
+No modelo acima foi retirado a variável "partido" que tem bastante significância  para o modelo.
+
+
+```{r}
+eleicoes2010_pior <- eleicoes2010_rm %>%
+  select(-quantidade_fornecedores)
+
+modeloPiorado2010 <- lm(votos~., data = eleicoes2010_pior)
+
+glance(modeloPiorado2010)
+```
+No modelo acima foi retirado a variável "quantidade_fornecedores" que tem pouca significância  para o modelo.
+
+
+```{r}
+glance(modelo2010)
+diferenca3 = glance(modelo2010)$adj.r.squared - glance(modeloMelhorado2010)$adj.r.squared
+diferenca4 = glance(modelo2010)$adj.r.squared - glance(modeloPiorado2010)$adj.r.squared
+```
+Observamos que a diferença do valor do R² ajustado é de `r round(diferenca3,3)` entre o primeiro modelo e o modelo original, já a diferença entre o segundo modelo e o original é de `r round(diferenca4,3)`, logo podemos dizer que quando retira a variável "partido" temos mudanças mais significantes, do que quando retira-se a variável "quantidade_fornecedores".
+
+
+#### 2.3 - Compare os valores de R2 e RSE considerando as regressões para cada ano.
 ```{r}
 
 ```
 
-# Questão 02.4
+#### 2.4 - Inclua outros pontos de comparação que você ache interessante.
 ```{r}
 
 ```
 
-# Questão 03
+# 3 - Todas as variáveis são úteis para os modelos de regressão? Há variáveis redudantes? Faça análises para 2006 e 2010 separadamente.
+
+* 2006
 ```{r}
-eleicoes2006_rm <- eleicoes2006_rm %>%
+eleicoes2006_cor <- eleicoes2006_rm %>%
   select(-c(quantidade_doadores, estado_civil, ano))
 ```
 
+Para responder a pergunta, é preciso observar a correlação entre as variáveis.
+
+No entanto temos algumas variáveis do tipo factor, neste caso vamos convertê-las para inteiro para que seja possível calcular correlação dela com as demais variáveis.
 ```{r fig.align = "center", fig.height=10,fig.width=10}
-dadosCorrelacao <- eleicoes2006_rm %>%
+dadosCorrelacao2006 <- eleicoes2006_cor %>%
   mutate(uf = as.numeric(uf)) %>%
   mutate(partido = as.numeric(partido)) %>%
   mutate(sexo = as.numeric(sexo)) %>%
@@ -106,10 +269,39 @@ dadosCorrelacao <- eleicoes2006_rm %>%
   mutate(ocupacao = as.numeric(ocupacao))
   round(2)
 
-ggpairs(dadosCorrelacao, axisLabels = "none")
+ggpairs(dadosCorrelacao2006, axisLabels = "none")
 ```
 
-# Questão 04
+Observamos uma alta correlação entre "total_despesa" e "total_receita" (0,982) e também entre "total_despesa" e "recursos_de_pessoas_juridicas" (0,888), por isso iremos remover a variável "total_despesa".
+
+As demais variáveis possuem correlação linear moderada ou baixa e em função disso serão mantidas.
+
+* 2010
+```{r}
+eleicoes2010_cor <- eleicoes2010_rm %>%
+  select(-c(quantidade_doadores, estado_civil, ano))
+```
+
+Para responder a pergunta, é preciso observar a correlação entre as variáveis.
+
+No entanto temos algumas variáveis do tipo factor, neste caso vamos convertê-las para inteiro para que seja possível calcular correlação dela com as demais variáveis.
+```{r fig.align = "center", fig.height=10,fig.width=10}
+dadosCorrelacao2010 <- eleicoes2010_cor %>%
+  mutate(uf = as.numeric(uf)) %>%
+  mutate(partido = as.numeric(partido)) %>%
+  mutate(sexo = as.numeric(sexo)) %>%
+  mutate(grau = as.numeric(grau)) %>%
+  mutate(ocupacao = as.numeric(ocupacao))
+  round(2)
+
+ggpairs(dadosCorrelacao2010, axisLabels = "none")
+```
+
+Observamos uma alta correlação entre "total_despesa" e "total_receita" (0,99) e também entre "total_despesa" e "recursos_de_pessoas_juridicas" (0,83), por isso iremos remover a variável "total_despesa".
+
+As demais variáveis possuem correlação linear moderada ou baixa e em função disso serão mantidas.
+
+#### 4 - No caso de haver variáveis pouco explicativas e/ou redudantes, construa um novo modelo sem essas variáveis e o compare ao modelo com todas as variáveis (e.g. em termos de R2 e RSE). Faça isso para 2006 e 2010 separadamente. 
 
 ```{r}
 eleicoesRS2 <- eleicoes2006_rm %>%
@@ -121,9 +313,16 @@ glance(modeloRS2)
 ```
 
 ```{r}
-glance(modelo)
-diff = glance(modelo)$adj.r.squared - glance(modeloRS2)$adj.r.squared
+glance(modelo2006)
+diferenca = glance(modelo2006)$adj.r.squared - glance(modeloRS2)$adj.r.squared
 
-round(diff,3)
+round(diferenca,3)
+```
+Acredito que, considerando que a taxa de aumento de erro e de diminuição do R² ajustado foi baixa (0.014), então a retirada da variável total_despesa não acarretou em mudanças muito drásticas no modelo.
+
+#### 5 - Construa agora uma regressão considerando os anos 2006 e 2010 em conjunto. Que diferenças/semelhanças você percebe em relação aos modelos individuais por ano? Veja a questão 2 para sugestões que você usar para comparação.
+
+```{r}
+
 ```
 
