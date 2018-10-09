@@ -11,7 +11,11 @@ library(ggplot2)
 library(Amelia)
 library(dplyr)
 library(tidyverse)
+library(broom)
+library(GGally)
 ```
+
+# Introdução
 
 ```{r}
 eleicoes2006 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006.csv")
@@ -19,13 +23,15 @@ eleicoes2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2010
 eleicoes2006_2010 <- read.csv("/Users/mattheusbrito/Downloads/AD2/Lab02/eleicoes_2006_e_2010.csv")
 ```
 
+
+
 ```{r}
 missmap(eleicoes2006)
 missmap(eleicoes2010)
 missmap(eleicoes2006_2010)
 ```
 
-
+# Questão 01
 ```{r}
 eleicoes2006_rm <- eleicoes2006 %>%
    select(-c(cargo))
@@ -34,24 +40,90 @@ eleicoes2006_rm <- eleicoes2006 %>%
 
 ```{r}
 eleicoes2006_rm <- eleicoes2006_rm %>%
-  select(~c(sequencial_candidato, nome))
+  select(-c(sequencial_candidato, nome))
 ```
 
 
 ```{r}
-model <- lm(votos~., data = eleicoes2006_rm)
+modelo <- lm(votos~., data = eleicoes2006_rm)
 ```
 
 ```{r}
-glance(model)
+glance(modelo)
 ```
 
 ```{r}
-anova(model)
+anova(modelo)
 ```
 
+
+
+# Questão 02.1
+
+```{r}
+modeloFiltrado <- lm(votos~., data=eleicoes2006_rm)
+```
+
+
+```{r}
+ggplot(modeloFiltrado, aes(x = predict(modeloFiltrado), y = residuals(modeloFiltrado))) +
+  geom_point(color= "darkblue") + 
+  xlab("Predict") + 
+  ylab("Residuals")
+  
+```
+
+
+# Questão 02.2
+
+```{r}
+anova(modeloFiltrado)
+```
+
+
+# Questão 02.3
+```{r}
+
+```
+
+# Questão 02.4
+```{r}
+
+```
+
+# Questão 03
 ```{r}
 eleicoes2006_rm <- eleicoes2006_rm %>%
-  select(-c(quantidade_doadores, estado_civil))
+  select(-c(quantidade_doadores, estado_civil, ano))
+```
+
+```{r fig.align = "center", fig.height=10,fig.width=10}
+dadosCorrelacao <- eleicoes2006_rm %>%
+  mutate(uf = as.numeric(uf)) %>%
+  mutate(partido = as.numeric(partido)) %>%
+  mutate(sexo = as.numeric(sexo)) %>%
+  mutate(grau = as.numeric(grau)) %>%
+  mutate(ocupacao = as.numeric(ocupacao))
+  round(2)
+
+ggpairs(dadosCorrelacao, axisLabels = "none")
+```
+
+# Questão 04
+
+```{r}
+eleicoesRS2 <- eleicoes2006_rm %>%
+  select(-total_despesa)
+
+modeloRS2 <- lm(votos~., data = eleicoesRS2)
+
+glance(modeloRS2)
+```
+
+```{r}
+glance(modelo)
+diff = glance(modelo)$adj.r.squared - glance(modeloRS2)$adj.r.squared
+
+round(diff,3)
 ```
 
