@@ -323,6 +323,11 @@ Acredito que, considerando que a taxa de aumento de erro e de diminuição do R�
 #### 5 - Construa agora uma regressão considerando os anos 2006 e 2010 em conjunto. Que diferenças/semelhanças você percebe em relação aos modelos individuais por ano? Veja a questão 2 para sugestões que você usar para comparação.
 
 ```{r}
+eleicoes <- eleicoes2006_2010  %>% select(-c(nome, sequencial_candidato, cargo, ano, ocupacao, uf))
 
+modelo_novo <- lm(data = eleicoes, votos ~., na.action = na.omit)
+
+modelo_novo %>%   summary()
 ```
 
+Após analisar, percebemos que o R quadrado e o RSL caíram. Pois as variáveis mais explicativas são: recursos_de_pessoas_juridicas, recursos_de_pessoas_fisicas, total_despesa, quantidade_fornecedores e total_receita. E as menos explicativas são: recursos_proprios, media_despesa, quantidade_doacoes e quantidade_doares. Percebemos uma ligeira mudança quanto as análises individuais, mas a maior foi a variável quantidade_fornecedores que aumentou o grau de significância no nosso modelo quando analisamos os dois anos em conjunto, em contrapartida das análises individuais, onde ela era menos significativa para o nosso modelo.
