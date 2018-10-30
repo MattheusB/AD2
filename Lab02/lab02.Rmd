@@ -174,7 +174,7 @@ ggplot(modelo2010, aes(x = predict(modelo2010), y = residuals(modelo2010))) +
 Após a plotagem do gráfico, percebemos que os resíduos são assimétrico e que por mais que tenha alguns pontos distantes, ainda há uma aglomeração que significa um padrão de comportamento, ou seja, não são aleatórios. Isso significa que o modelo não é ideal e que faltam transformações ou interações entre as variáveis.
 
 
-# 2.2 - Quais variáveis conseguem explicar melhor o número de votos? Compare essas variáveis entre os modelos. Mesma coisa para as variáveis menos explicativas.
+#### 2.2 - Quais variáveis conseguem explicar melhor o número de votos? Compare essas variáveis entre os modelos. Mesma coisa para as variáveis menos explicativas.
 Para responder a pergunta utilizaremos os valores de R² para comparar os modelos.
 
 * 2006
@@ -239,17 +239,7 @@ diferenca4 = glance(modelo2010)$adj.r.squared - glance(modeloPiorado2010)$adj.r.
 Observamos que a diferença do valor do R² ajustado é de `r round(diferenca3,3)` entre o primeiro modelo e o modelo original, já a diferença entre o segundo modelo e o original é de `r round(diferenca4,3)`, logo podemos dizer que quando retira a variável "partido" temos mudanças mais significantes, do que quando retira-se a variável "quantidade_fornecedores".
 
 
-#### 2.3 - Compare os valores de R2 e RSE considerando as regressões para cada ano.
-```{r}
-
-```
-
-#### 2.4 - Inclua outros pontos de comparação que você ache interessante.
-```{r}
-
-```
-
-# 3 - Todas as variáveis são úteis para os modelos de regressão? Há variáveis redudantes? Faça análises para 2006 e 2010 separadamente.
+#### 3 - Todas as variáveis são úteis para os modelos de regressão? Há variáveis redudantes? Faça análises para 2006 e 2010 separadamente.
 
 * 2006
 ```{r}
