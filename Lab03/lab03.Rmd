@@ -10,6 +10,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(caret)
 library(dplyr)
+library(lars)
 ```
 
 
@@ -52,4 +53,41 @@ controleFit <- trainControl(method = "repeatedcv",
 
 valoresPreProcessados <- c("center", "scale", "nzv")
 ```
+
+
+
+```{r eval = FALSE}
+modeloRidge <- train(votos ~ .,
+                      data = treino,
+                      trControl = controleFit,
+                      method = "ridge",
+                      preProcess = valoresPreProcessados,
+                      tuneLength = 15)
+modeloRidge
+```
+
+```{r eval = FALSE}
+predicaoRidge <- predict(modeloRidge)
+dadosRidge <- data.frame(pred = predicaoRidge, obs = treino$votos)
+
+ridge <- round(defaultSummary(dadosRidge), digits = 4)
+
+ridge
+```
+
+
+```{r}
+modeloLasso <- train(votos ~ .,
+                     data = treino,
+                     trControl = controleFit,
+                     method = "lasso",
+                     preProcess = valoresPreProcessados,
+                     tuneLength = 15)
+modeloLasso
+```
+
+```{r}
+
+```
+
 
