@@ -1,0 +1,55 @@
+---
+title: "Predicao de Vota????o de Deputados"
+author: "Mattheus Brito Rodrigues"
+date: "30/10/2018"
+output: html_document
+---
+# Introdu????o
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(dplyr)
+```
+
+
+```{r}
+dados <- read.csv("~/Downloads/AD2/Lab03/sample_submission.csv")
+dados[is.na(dados)] <- 0
+
+tamanhoParticao <- floor(0.75 * nrow(dados))
+
+set.seed(123)
+
+particaoIndice <- sample(seq_len(nrow(dados)), size = tamanhoParticao)
+
+treino <- dados[tamanhoParticao, ]
+teste <- dados[-tamanhoParticao, ]
+
+treino <- read.csv("~/Downloads/AD2/Lab03/train.csv")
+teste <- read.csv("~/Downloads/AD2/Lab03/test.csv")
+
+treino <- treino %>%
+  select(-cargo, -nome)
+
+teste <- teste %>%
+  select(-cargo, -nome)
+
+treino[is.na(treino)] <- 0
+teste[is.na(teste)] <- 0
+
+```
+
+#Perguntas
+
+#### 1 - Usando todas as vari??veis dispon??veis, tune (usando valida????o cruzada): (i) um modelo de regress??o Ridge, (ii) um modelo de regress??o Lasso e (iii) um modelo KNN. Para os modelos de regress??o linear, o par??metro a ser tunado ?? o lambda (penaliza????o dos coeficientes) e o KNN o n??mero de vizinhos.
+
+```{r}
+controleFit <- trainControl(method = "repeatedcv",
+                            number = 5,
+                            repeats = 5,
+                            search = "random")
+
+valoresPreProcessados <- c("center", "scale", "nzv")
+```
+
