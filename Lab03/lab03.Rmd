@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(caret)
 library(dplyr)
 library(lars)
+library(ggplot2)
 ```
 
 
@@ -87,7 +88,38 @@ modeloLasso
 ```
 
 ```{r}
+predicaoLasso <- predict(modeloLasso)
+dadosLasso <- data.frame(pred = predicaoLasso, obs = treino$votos)
 
+lasso <- round(defaultSummary(dadosLasso), digits = 4)
+
+lasso
+```
+```{r}
+modeloKNN <- train(votos ~ .,
+                   data = treino,
+                   trControl = controleFit,
+                   method = "knn",
+                   preProcess = valoresPreProcessados,
+                   tuneLength = 14)
+
+modeloKNN
 ```
 
+```{r}
+predicaoKNN <- predict(modeloKNN)
+dadosKNN <- data.frame(pred = predicaoKNN, obs = treino$votos)
+
+knn <- round(defaultSummary(dadosKNN), digits = 4)
+
+knn
+```
+
+#### 2 - Compare os três modelos em termos do erro RMSE de validação cruzada.
+
+```{r}
+plot(modeloRidge, xlab = "Lambda", ylab = "RMSE")
+plot(modeloLasso, xlab = "Lambda", ylab = "RMSE")
+plot(modeloKNN, ylab = "RMSE")
+```
 
