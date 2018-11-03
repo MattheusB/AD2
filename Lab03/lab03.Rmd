@@ -24,7 +24,7 @@ tamanhoParticao <- floor(0.75 * nrow(dados))
 
 set.seed(123)
 
-particaoIndice <- sample(seq_len(nrow(dados)), size = tamanhoParticao)
+particaoIndice <- sample(seq_len(nrow(dados)), size = tamanhoParticao, replace = TRUE)
 
 treino <- dados[tamanhoParticao, ]
 teste <- dados[-tamanhoParticao, ]
@@ -33,10 +33,10 @@ treino <- read.csv("~/Downloads/AD2/Lab03/train.csv", encoding = "latin1")
 teste <- read.csv("~/Downloads/AD2/Lab03/test.csv", encoding = "latin1")
 
 treino <- treino %>%
-  select(-cargo, -nome)
+  select(-c(cargo, nome))
 
 teste <- teste %>%
-  select(-cargo, -nome)
+  select(-c(cargo, nome))
 
 treino[is.na(treino)] <- 0
 teste[is.na(teste)] <- 0
@@ -49,10 +49,11 @@ teste[is.na(teste)] <- 0
 #### 1 - Usando todas as vari??veis dispon??veis, tune (usando valida????o cruzada): (i) um modelo de regress??o Ridge, (ii) um modelo de regress??o Lasso e (iii) um modelo KNN. Para os modelos de regress??o linear, o par??metro a ser tunado ?? o lambda (penaliza????o dos coeficientes) e o KNN o n??mero de vizinhos.
 
 ```{r}
-controleFit <- trainControl(method = "repeatedcv",
-                            number = 5,
-                            repeats = 5,
-                            search = "random")
+controleFit <- trainControl(method = "cv",
+                            number = 20,
+                            repeats = 20)
+
+lambda.grid <- expand.grid(lambda = seq(0, 2, by=0.1))
 
 valoresPreProcessados <- c("center", "scale", "nzv")
 ```
@@ -62,6 +63,7 @@ valoresPreProcessados <- c("center", "scale", "nzv")
 ```{r eval = FALSE}
 modeloRidge <- train(votos ~ .,
                       data = treino,
+                      tuneGrid = lambda.grid,
                       trControl = controleFit,
                       method = "ridge",
                       preProcess = valoresPreProcessados,
@@ -139,10 +141,18 @@ ggplot(varImp(modeloRidge))
 #### 4 - Re-treine o melhor modelo (usando os melhores valores de parâmetros encontrados em todos os dados, sem usar validação cruzada).
 
 ```{r}
+treinoK <- treino %>% select (-partido, -recursos_proprios,
+                           -recursos_de_outros_candidatos.comites)
+
+testeK <- teste %>% select (-partido, -recursos_proprios,
+                           -recursos_de_outros_candidatos.comites)
+```
+
+```{r}
 grid <- expand.grid(k = modeloLasso$bestTune)
 controle <- trainControl(method = "optimism_boot")
 modeloLassoCV <- train(votos ~ ., 
-               data = treino,
+               data = treinoK,
                method = "lasso",
                tuneGrid = grid,
                trControl = controle,
@@ -163,7 +173,11 @@ lassoCV
 #### 5 - Use esse último modelo treinado para prever os dados de teste disponíveis no challenge que criamos na plataforma Kaggle
 
 ```{r eval = FALSE}
-predicao <- predict(modeloLassoCV, teste)
+modeloLassoCV$xlevels[["ocupacao"]] <- union(modeloLassoCV$xlevels[["ocupacao"]], levels(testeK$ocupacao))
+predicao <- predict(modeloLassoCV, testeK)
+ID <- testeK %>%
+  select(sequencial_candidato)
+colnames(ID)[colnames(ID)=="sequencial_candidato"] <- "ID"
 arquivoCSV <- ID
 arquivoCSV$votos <- predicao
 arquivoCSV$votos[arquivoCSV$votos < 0] <- 0
