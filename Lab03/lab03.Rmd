@@ -135,7 +135,7 @@ ggplot(varImp(modeloRidge))
 ```
 
 ```{r}
-ggplot(varImp(modeloRidge))
+ggplot(varImp(modeloLasso))
 ```
 
 #### 4 - Re-treine o melhor modelo (usando os melhores valores de parâmetros encontrados em todos os dados, sem usar validação cruzada).
