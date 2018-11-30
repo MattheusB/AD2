@@ -1,0 +1,19 @@
+---
+title: "Predição de Eleição de Deputados"
+author: "Mattheus Brito"
+date: "30/11/2018"
+output: html_document
+---
+
+# Introdução
+Esta análise será feita utilizando conhecimentos sobre classificação para prever quais candidatos à Câmara de Deputados serão eleitos nas eleições de 2014. Logo abaixo será respondido 5 perguntas propostas pela organização da cadeira de Análise de Dados 2, tomando como base os dados fornecidos.
+
+Antes de tudo será importado as nossas bibliotecas que serão utilizadas para a plotagem das análises para responder as questões.
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+Logo após, será importado a nossa base de dados, sendo elas: train.csv (conjunto de treino que contém dados das eleições dos anos de 2006 e 2010), test.csv (conjunto de teste que contém dados das eleições de 2014). Assim como remover informações que tem pouca relevância, como nome e cargo que iriam demandar um custo elevado de tempo e atrapalhar no processo de tunagem e por fim substituir dados com NA para 0, pois utilizar dados com NA não é de bom uso.
+

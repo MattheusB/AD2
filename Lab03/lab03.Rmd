@@ -5,7 +5,7 @@ date: "30/10/2018"
 output: html_document
 ---
 # Introdução
-Esta análise será feita uitlizando dados sobre a votação de candidatos à Câmara Federal de Deputados. Onde será feita algumas predições dessas votações. Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos.
+Esta análise será feita utlizando dados sobre a votação de candidatos à Câmara Federal de Deputados. Onde será feita algumas predições dessas votações. Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos.
 
 Antes de tudo será importado as nossas bibliotecas que serão utilizadas para a plotagem das análises para responder as questões.
 
