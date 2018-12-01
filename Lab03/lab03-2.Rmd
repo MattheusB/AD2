@@ -164,6 +164,8 @@ Após definir o controle e os valores pré-processados, podemos definir nossa f�
 
 
 * KNN
+
+Gerando o modelo KNN com o treino balanceado:
 ```{r eval=FALSE}
 modeloKNN <- train(formula,
                    data = treinoBoth,
@@ -188,7 +190,7 @@ regressaoLogistica <- train(formula,
 
 regressaoLogistica
 ```
-Após observar a regressão logística gerada, pode-se observar que a acurácia é de . Podendo enfatizar a importância da acurácia encontrada pois ela vai dizer a precisão que as observações estão classificadas corretamente.
+Após observar a regressão logística gerada, pode-se observar que a acurácia é de 0.8745014. Podendo enfatizar a importância da acurácia encontrada pois ela vai dizer a precisão que as observações estão classificadas corretamente.
 
 * Árvore Decisão
 
@@ -202,7 +204,7 @@ arvoreDecisao <- train(formula,
                 tuneLength = 15)
 arvoreDecisao
 ```
-O algortmo escolhe a melhor acurácia, e o resultado que obtemos no nosso modelo de árvore foi de cp =  aproximadamente. Esse modelo nos retornou uma acurácia melhor do que a regressão logística, indicando que os valores podem ser melhor classificados.
+O algortmo escolhe a melhor acurácia, e o resultado que obtemos no nosso modelo de árvore foi de cp = 0.0003968254. Esse modelo nos retornou uma acurácia melhor do que a regressão logística, indicando que os valores podem ser melhor classificados.
 
 * Adaboost
 
