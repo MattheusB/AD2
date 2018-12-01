@@ -13,6 +13,9 @@ Antes de tudo será importado as nossas bibliotecas que serão utilizadas para a
 ```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(plotly)
+library(caret)
+library(ROSE)
 
 ```
 
@@ -75,9 +78,71 @@ Antes de partir para as perguntas, é necessário entender o que cada coluna pre
 
 #### 1 - Há desbalanceamento das classes (isto é, uma classe tem muito mais instâncias que outra)? Em que proporção? Quais efeitos colaterais o desbalanceamento de classes pode causar no classificador? Como você poderia tratar isso?
 
+Para responder essa pergunta utilizaremos um gráfico de barras que vai exibir o número de deputados eleitos e não eleitos.
+
 ```{r}
+situacaoParlamentares <-treino %>% 
+  group_by(situacao) %>% 
+    summarise(total = n())
+situacaoParlamentares %>%
+  plot_ly(y = ~total, type = "bar", color = ~situacao) %>%
+  layout(title = "Número de Deputados eleitos ou não eleitos",
+         yaxis = list(title = "Total de Parlamentares"),
+         xaxis = list (title = "Eleito ou não eleito"))
+```
+
+No gráfico acima, pode-se enxergar que há uma grande discrepância entre o número de canditados eleitos e o número de candidatos não eleitos, ou seja, as classes são desbalanceadas em uma proporção de que o número de candidatos não eleitos é 6 vezes maior que o número de candidatos eleitos. Desse modo, isso pode prejudicar a análise tornando o seu resultado enviezado. Sendo assim, é necessário que haja um balanceamento entre as classes fornecidas. Para isso existem 3 modos eficazes:
+
+* Over
+```{r}
+treinoOver <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="over")$data
+
+plotOver <- treinoOver %>% 
+  group_by(situacao) %>% 
+    summarise(total = n())
+
+plotOver %>%
+  plot_ly(y = ~total, type = "bar", color = ~situacao) %>%
+  layout(title = "Número de Deputados eleitos ou não eleitos",
+         yaxis = list(title = "Total de Parlamentares"),
+         xaxis = list (title = "Eleito ou não eleito"))
+```
+Como pode ser visto no gráfico acima o método "over", aumenta o parâmetro que está em menor vigor, elevando o número de candidatos eleitos para 6542.
+
+* Under
+```{r}
+treinoUnder <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="under")$data
+
+plotUnder <- treinoUnder %>% 
+  group_by(situacao) %>% 
+    summarise(total = n())
+
+plotUnder %>%
+  plot_ly(y = ~total, type = "bar", color = ~situacao) %>%
+  layout(title = "Número de Deputados eleitos ou não eleitos",
+         yaxis = list(title = "Total de Parlamentares"),
+         xaxis = list (title = "Eleito ou não eleito"))
 
 ```
+Observando o gráfico acima vemos que o "under", diminui o parâmetro que está em maior vigor, diminuindo o número de para 982.
+
+* Both
+```{r}
+treinoBoth <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="both")$data
+
+plotBoth <- treinoBoth %>% 
+  group_by(situacao) %>% 
+    summarise(total = n())
+
+plotBoth %>%
+  plot_ly(y = ~total, type = "bar", color = ~situacao) %>%
+  layout(title = "Número de Deputados eleitos ou não eleitos",
+         yaxis = list(title = "Total de Parlamentares"),
+         xaxis = list (title = "Eleito ou não eleito"))
+```
+E por fim o gráfico acima retrata o "both", que vai mesclar os dois métodos anteriores. Alterando o número tanto de candidatos eleitos quanto o de não eleitos, deixando com 3842 e 3780, respectivamente.
+
+Na análise, foi optado por usar o "both", baseado no fato de que se utilizasse o método "over", vários outros dados teriam que ser criados e isso poderia afetar no resultado final e se utilizasse o método "under" sobraria poucos dados para executar a análise. Sendo assim, o método "both" iria ser um meio termo entre o "over" e o "under".
 
 #### 2 - Treine: um modelo de KNN, regressão logística, uma árvore de decisão e um modelo de adaboost. Tune esses modelos usando validação cruzada e controle overfitting se necessário, considerando as particularidades de cada modelo.
 
