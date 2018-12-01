@@ -45,6 +45,9 @@ treino <- treino %>%
 
 teste <- teste%>%
   select(-c(nome, partido, uf, total_despesa, estado_civil, ocupacao, sexo, grau))
+
+treino[is.na(treino)] <- 0
+teste[is.na(teste)] <- 0
 ```
 
 Antes de partir para as perguntas, é necessário entender o que cada coluna presente nos nossos dados significa:
@@ -146,9 +149,76 @@ Na análise, foi optado por usar o "both", baseado no fato de que se utilizasse 
 
 #### 2 - Treine: um modelo de KNN, regressão logística, uma árvore de decisão e um modelo de adaboost. Tune esses modelos usando validação cruzada e controle overfitting se necessário, considerando as particularidades de cada modelo.
 
-```{r}
+Para a criação da nossa fórmula, vamos utilizar o modelo "KNN" visto que foi considerado o melhor modelo pelo laboratório anterior da disciplina.
 
+```{r}
+controleFit <- trainControl(method = "repeatedcv",
+                            number = 20,
+                            repeats = 20)
+
+valoresPreProcessados <- c("center", "scale", "nzv")
+
+formula = as.formula(situacao ~  total_receita + quantidade_despesas + recursos_de_pessoas_juridicas + quantidade_doacoes + quantidade_fornecedores + media_receita + quantidade_doadores)
 ```
+Após definir o controle e os valores pré-processados, podemos definir nossa fórmula para os modelos de knn, regressáo logística e árvore de Decisão.
+
+
+* KNN
+```{r eval=FALSE}
+modeloKNN <- train(formula,
+                   data = treinoBoth,
+                   trControl = controleFit,
+                   method = "knn",
+                   preProcess = valoresPreProcessados,
+                   tuneLength = 15)
+
+modeloKNN
+```
+
+
+* Regressão Logística
+
+A regressão logística é um técnica que utiliza conceitos semelhantes ao modelo de regressão linear, no entanto, ele utiliza a variável dependente é uma variável discreta.
+```{r}
+regressaoLogistica <- train(formula,
+                 data = treinoBoth,
+                 method="glm",
+                 trControl = controleFit
+                 )
+
+regressaoLogistica
+```
+Após observar a regressão logística gerada, pode-se observar que a acurácia é de . Podendo enfatizar a importância da acurácia encontrada pois ela vai dizer a precisão que as observações estão classificadas corretamente.
+
+* Árvore Decisão
+
+A árvore de decisão é um modelo que gera resultados a partir de parâmetros que demostram se o valor de tal parâmetro leva a um resultado positivo ou negativo. 
+```{r}
+arvoreDecisao <- train(formula,
+                data= treinoBoth, 
+                method = "rpart",
+                trControl = controleFit,
+                preProcess = valoresPreProcessados,
+                tuneLength = 15)
+arvoreDecisao
+```
+O algortmo escolhe a melhor acurácia, e o resultado que obtemos no nosso modelo de árvore foi de cp =  aproximadamente. Esse modelo nos retornou uma acurácia melhor do que a regressão logística, indicando que os valores podem ser melhor classificados.
+
+* Adaboost
+
+O adaboost, tem o seu diferencial que é o seu poder de predizer, tomando como base o estudo da predição e o aumento dos pesos das variáveis que tem um maior grau de importância. No entanto, é um modelo que demanda uma parte muito grande de tempo, desse modo, foi decidido que é mais benéfico diminuir o número de variáveis presentes na fórmula utilizada.
+```{r}
+formulaAdaboost = as.formula(situacao ~ media_receita + quantidade_doacoes)
+
+
+adaboost <- train(formulaAdaboost,
+                data=treinoBoth,
+                trControl = controleFit,
+                method = "adaboost")
+
+adaboost
+```
+Após observar o resultado do modelo Adaboost, podemos confirmar que
 
 #### 3 - Reporte precision, recall e f-measure no treino e validação. Há uma grande diferença de desempenho no treino/validação? Como você avalia os resultados? Justifique sua resposta.
 
@@ -163,3 +233,8 @@ Na análise, foi optado por usar o "both", baseado no fato de que se utilizasse 
 ```
 
 #### 5 - Envie seus melhores modelos à competição do Kaggle. Faça pelo menos uma submissão. Sugestões para melhorar o modelo:
+
+```{r}
+
+```
+
