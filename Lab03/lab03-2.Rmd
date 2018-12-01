@@ -220,13 +220,140 @@ adaboost <- train(formulaAdaboost,
 
 adaboost
 ```
-Após observar o resultado do modelo Adaboost, podemos confirmar que
+Após observar o resultado do modelo Adaboost, podemos confirmar que o modelo gerado explica 96%, o que é um ótimo resultado.
 
 #### 3 - Reporte precision, recall e f-measure no treino e validação. Há uma grande diferença de desempenho no treino/validação? Como você avalia os resultados? Justifique sua resposta.
 
-```{r}
+Antes de começar a responder a pergunta, vamos defirnir o que é cada termo solicitado na questão:
+* Precision
+Precision é a proporção do acerto, ou seja, ele verifica se os que o modelo classificou como certo realmente são certos.
+* Recall
+Recall é a frequência dada pelas vezes que o classificador encontrou exemplos em uma classe, ou seja, ele diz quantas das observações preditas como verdadeiras realmente são positivas.
+* F-Measure
+F-Measure é a média ponderada da precision e do recall, levando em conta falsos positivos (FP) e falsos negativos (FN) que serão explicados posteriormente, ou seja, ele é o balanço entre o FP e o FN.
 
+Os parâmetros mecionados acima são calculados baseados nos seguintes temos:
+*Verdadeiros Positivos (TP)
+*Verdadeiros Negativos (TN)
+*Falsos Positivos (FP)
+*Falsos Negativos (FN).
+
+$$Precision = TP / (TP + FP)$$
+$$Recall = TP / (TP + FN)$$
+$$F-measure = 2*(Recall + Precision)/(Recall + Precision)$$
+Decidimos analisar cada modelo em particular e tirar conclusões sobre o seu: Precision, Recal e F-Measure.
+
+* KNN
+
+```{r}
+treino$predicaoKNN <- predict(modeloKNN, treino)
+
+treinoKNNTP <- treino %>%
+  filter(situacao == "eleito", predicaoKNN == "eleito") %>% 
+  nrow()
+treinoKNNTN <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoKNN == "nao_eleito" ) %>% 
+  nrow()
+treinoKNNFP <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoKNN == "eleito") %>% 
+  nrow()
+treinoKNNFN <- treino %>% 
+  filter(situacao == "eleito", predicaoKNN == "nao_eleito" ) %>% 
+  nrow()
+
+treinoKNNPrecision <- treinoKNNTP / (treinoKNNTP + treinoKNNFP)
+treinoKNNRecall <- treinoKNNTP / (treinoKNNTP + treinoKNNFN)
+treinoKNNFMeasure <- 2*(treinoKNNRecall*treinoKNNPrecision)/(treinoKNNRecall+treinoKNNPrecision)
+
+treinoKNNPrecision
+treinoKNNRecall
+treinoKNNFMeasure
 ```
+No modelo KNN o nível de precisão foi de aproximadamente apenas 50% o que não é um número muito elevado. No entanto, o recall obtido na análise mostra que 96% das vezes uma variável predita como positiva realmente era positiva, aproximadamente e por fim o seu F-Measure resultou em cerca de 67%.  
+
+
+* Regressão Logística
+```{r}
+treino$predicaoRegressao <- predict(regressaoLogistica, treino)
+
+treinoRegressaoTP <- treino %>% 
+  filter(situacao == "eleito", predicaoRegressao == "eleito") %>% 
+  nrow()
+treinoRegressaoTN <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoRegressao == "nao_eleito" ) %>% 
+  nrow()
+treinoRegressaoFP <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoRegressao == "eleito") %>% 
+  nrow()
+treinoRegressaoFN <- treino %>% 
+  filter(situacao == "eleito", predicaoRegressao == "nao_eleito" ) %>% 
+  nrow()
+
+treinoRegressaoPrecision <- treinoRegressaoTP / (treinoRegressaoTP + treinoRegressaoFP)
+treinoRegressaoRecall <- treinoRegressaoTP / (treinoRegressaoTP + treinoRegressaoFN)
+treinoRegressaoFMeasure <- 2*(treinoRegressaoRecall*treinoRegressaoPrecision)/(treinoRegressaoRecall+treinoRegressaoPrecision)
+
+treinoRegressaoPrecision
+treinoRegressaoRecall
+treinoRegressaoFMeasure
+```
+Já no modelo de Regressão Logística o nível de precisão foi um pouco maior do que no modelo KNN (60%) o que melhora um pouco. No entanto, o recall obtido na análise baixou para 81%, ou seja, melhorou um pouco mais baixou um pouco também, e por fim o seu F-Measure resultou em cerca de 69%.
+
+* Árvore de decisão
+```{r}
+treino$predicaoArvore <- predict(arvoreDecisao, treino)
+
+treinoArvoreTP <- treino %>% 
+  filter(situacao == "eleito", predicaoArvore == "eleito") %>% 
+  nrow()
+treinoArvoreTN <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoArvore == "nao_eleito" ) %>% 
+  nrow()
+treinoArvoreFP <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoArvore == "eleito") %>% 
+  nrow()
+treinoArvoreFN <- treino %>% 
+  filter(situacao == "eleito", predicaoArvore == "nao_eleito" ) %>% 
+  nrow()
+
+treinoArvorePrecision <- treinoArvoreTP / (treinoArvoreTP + treinoArvoreFP)
+treinoArvoreRecall <- treinoArvoreTP / (treinoArvoreTP + treinoArvoreFN)
+treinoArvoreFMeasure <- 2*(treinoArvoreRecall*treinoArvorePrecision)/(treinoArvoreRecall+treinoArvorePrecision)
+
+treinoArvorePrecision
+treinoArvoreRecall
+treinoArvoreFMeasure
+```
+No modelo de Árvore de decisão o nível de precisão foi de 58% o que indica como um meio termo entre os dois últimos modelos analisados. Já em termos do recall obtido na análise foi de 95%, aproximadamente, ou seja, o maior obtido até o momento, assim como o seu F-Measure que foi de 72%.
+
+* Adaboost
+
+```{r}
+treino$predicaoAdaboost <- predict(adaboost, treino)
+
+treinoAdaboostTP <- treino %>% 
+  filter(situacao == "eleito", predicaoAdaboost == "eleito") %>% 
+  nrow()
+treinoAdaboostTN <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoAdaboost == "nao_eleito" ) %>% 
+  nrow()
+treinoAdaboostFP <- treino %>% 
+  filter(situacao == "nao_eleito" , predicaoAdaboost == "eleito") %>% 
+  nrow()
+treinoAdaboostFN <- treino %>% 
+  filter(situacao == "eleito", predicaoAdaboost == "nao_eleito" ) %>% 
+  nrow()
+
+treinoAdaboostPrecision <- treinoAdaboostTP / (treinoAdaboostTP + treinoAdaboostFP)
+treinoAdaboostRecall <- treinoAdaboostTP / (treinoAdaboostTP + treinoAdaboostFN)
+treinoAdaboostFMeasure <- 2*(treinoAdaboostRecall*treinoAdaboostPrecision)/(treinoAdaboostRecall+treinoAdaboostPrecision)
+
+treinoAdaboostPrecision
+treinoAdaboostRecall
+treinoAdaboostFMeasure
+```
+Após observar o resultado obtido, podemos ver uma melhora tendo em vista o modelo Adaboost, pois o nível de precisão foi de 73%, aproximadamente. Também pode ser visto essa mudança analisando o seu Recall que foi de 99%. E finalmente o seu F-Measure que também foi o maior obtido entre os 4 modelos chegando ao número de 84%, aproximadamente.
+
 
 #### 4 - Interprete as saídas dos modelos. Quais atributos parecem ser mais importantes de acordo com cada modelo?
 
