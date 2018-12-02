@@ -16,6 +16,7 @@ library(dplyr)
 library(plotly)
 library(caret)
 library(ROSE)
+library(readr)
 
 ```
 
@@ -357,13 +358,44 @@ Após observar o resultado obtido, podemos ver uma melhora tendo em vista o mode
 
 #### 4 - Interprete as saídas dos modelos. Quais atributos parecem ser mais importantes de acordo com cada modelo?
 
+* KNN
 ```{r}
-
+varImp(modeloKNN)
 ```
+
+
+* Regressao Logística
+```{r}
+varImp(regressaoLogistica)
+```
+
+* Árvore de Decisão
+```{r}
+varImp(arvoreDecisao)
+```
+
+* Adaboost
+```{r}
+varImp(adaboost)
+```
+
+Após a utilização da função varImp (função que lista as variáveis do modelo ordenando por sua importância) nos quatro modelos, pode-se afirmar que no geral a variável que tem mais importância é "total_receita" e a que tem menos importância é a de "media_receita", pois total_receita obteve um overall de 100 em todos os modelos e media_receita teve overall de 0 em quase todos, menos no modelo de Regressão Logística que ainda teve um resultado de 4.105 o que é um número baixo ainda.
 
 #### 5 - Envie seus melhores modelos à competição do Kaggle. Faça pelo menos uma submissão. Sugestões para melhorar o modelo:
 
 ```{r}
+regressaoLogisticaKaggle <- train(formula,
+                 data = treinoBoth,
+                 method="glm",
+                 trControl = controleFit, 
+                 family="binomial",
+                 na.action = na.omit)
+
+predicaoFinalKaggle <- predict(regressaoLogisticaKaggle,teste)
+dados <- data.frame(ID = teste$sequencial_candidato, Predicted = predicaoFinalKaggle)
+dados$ID <- as.character(dados$ID)
+dados %>% 
+  write_csv(path = "~/Downloads/AD2/Lab03/all/submissao.csv") 
 
 ```
 
