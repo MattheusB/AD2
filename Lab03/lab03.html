@@ -130,7 +130,7 @@ $(document).ready(function () {
 
 <div id="introducao" class="section level1">
 <h1>Introdução</h1>
-<p>Esta análise será feita uitlizando dados sobre a votação de candidatos à Câmara Federal de Deputados. Onde será feita algumas predições dessas votações. Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos.</p>
+<p>Esta análise será feita utlizando dados sobre a votação de candidatos à Câmara Federal de Deputados. Onde será feita algumas predições dessas votações. Logo abaixo será respondido 5 perguntas tomando como base os dados fornecidos.</p>
 <p>Antes de tudo será importado as nossas bibliotecas que serão utilizadas para a plotagem das análises para responder as questões.</p>
 <p>Logo após, será importado a nossa base de dados, sendo elas: train.csv (conjunto de treino que contém dados das eleições dos anos de 2006 e 2010), test.csv (conjunto de teste que contém dados das eleições de 2014). Assim como remover informações que tem pouca relevância, como nome e cargo que iriam demandar um custo elevado de tempo e atrapalhar no processo de tunagem e por fim substituir dados com NA para 0, pois utilizar dados com NA não é de bom uso.</p>
 <pre class="r"><code>treino &lt;- read.csv(&quot;~/Downloads/AD2/Lab03/train.csv&quot;, encoding = &quot;latin1&quot;)
@@ -146,29 +146,30 @@ treino[is.na(treino)] &lt;- 0
 teste[is.na(teste)] &lt;- 0</code></pre>
 <p>Antes de partir para as perguntas, é necessário entender o que cada coluna presente nos nossos dados significa:</p>
 <ul>
-<li>“sequencial_candidato” :(character) id do candidato</li>
-<li>“nome”: (character)</li>
-<li>“uf”: (character)</li>
-<li>“partido”: (character)</li>
-<li>“quantidade_doacoes”: (integer)</li>
-<li>“quantidade_doadores”: (integer) número de doadores diferentes</li>
-<li>“total_receita”: (double) soma em R$ das doações</li>
-<li>“media_receita”: (double) média das doações</li>
-<li>“recursos_de_outros_candidatos/comites”: (double) quantia em R$ das doações provenientes de outros candidatos ou comite partidário</li>
-<li>“recursos_de_pessoas_fisicas”: (double) quantia em R$ das doações provenientes de outros CPFs</li>
-<li>“recursos_de_pessoas_juridicas”: (double) quantia em R$ das doações provenientes de outros CNPJ</li>
-<li>“recursos_proprios”: (double) quantia em R$ das doações provenientes do próprio candidato</li>
-<li>“recursos_de_partido_politico”: (double) quantia em R$ das doações provenientes do partido político do candidato</li>
-<li>“votos”: (integer) variável alvo. Se refere ao número de votos na campanha de 2006 e 2010</li>
-<li>“quantidade_despesas”: (integer)</li>
-<li>“quantidade_fornecedores”: (integer) número de fornecedores/despesas diferentes</li>
-<li>“total_despesa”: (double) soma em R$ das despesas de campanha</li>
-<li>“media_despesa”: (double) média das despesas de campanha</li>
-<li>“cargo”: (character)</li>
-<li>“Sexo”: (character)</li>
-<li>“grau”: (character) grau de instrução do candidato</li>
-<li>“estado_civil”: (character)</li>
-<li>“ocupacao”: (character) ocupação do candidato</li>
+<li>ano: Ano da eleição;</li>
+<li>sequencial_candidato: O identificador do candidato. Corresponde à coluna ID do arquivo de submissão;</li>
+<li>nome: Nome do candidato;</li>
+<li>uf: Sigla do estado do candidato;</li>
+<li>partido: Partido do candidato;</li>
+<li>quantidade_doacoes: Número de doações que um candidato recebeu;</li>
+<li>quantidade_doadores: Numero de doadores que um candidato teve;</li>
+<li>total_receita: Total de receita de um candidato;</li>
+<li>media_receita: Média da receita de um candidato;</li>
+<li>recursos_de_outros_candidatos.comites: Total de receita proveniente de outros candidatos e comitês;</li>
+<li>recursos_de_pessoas_fisicas: Total de receita proveniente de pessoas físicas;</li>
+<li>recursos_de_pessoas_juridicas: Total de receita proveniente de pessoas juridicas;</li>
+<li>recursos_proprios:Total de receita proveniente dos próprios candidatos;</li>
+<li>recursos_de_partido_politico: Total de receita proveniente do partido do candidato;</li>
+<li>quantidade_despesas: Número de despesas que um candidato teve;</li>
+<li>quantidade_fornecedores: Número de fornecedores que um candidato teve;</li>
+<li>total_despesa: Total de depesa de um candidato;</li>
+<li>media_despesa: Média da despesa de um candidato;</li>
+<li>cargo: Cargo ao qual o candidato está concorrendo;</li>
+<li>sexo: Sexo do candidato;</li>
+<li>grau: Grau de escolaridade do candidato;</li>
+<li>estado_civil: Estado civil do candidato;</li>
+<li>ocupacao: Ocupação do candidato;</li>
+<li>votos: Número de votos do candidato.</li>
 </ul>
 <p>Após entender as variáveis disponíveis, poderemos partir para a resolução das perguntas.</p>
 </div>
@@ -179,9 +180,9 @@ teste[is.na(teste)] &lt;- 0</code></pre>
 <p>Para realizar a tunagem das nossas variáveis vamos utilizar validação cruzada. Ou seja, teremos que fazer ums buca para encontrar os melhores valores para que o teste seja melhor. Sendo assim, segue o passo de utilizar validação cruzada:</p>
 <pre class="r"><code>controleFit &lt;- trainControl(method = &quot;cv&quot;,
                             number = 20,
-                            repeats = 20)</code></pre>
-<pre><code>## Warning: `repeats` has no meaning for this resampling method.</code></pre>
-<pre class="r"><code>valoresPreProcessados &lt;- c(&quot;center&quot;, &quot;scale&quot;, &quot;nzv&quot;)</code></pre>
+                            repeats = 20)
+
+valoresPreProcessados &lt;- c(&quot;center&quot;, &quot;scale&quot;, &quot;nzv&quot;)</code></pre>
 <ul>
 <li>Modelo de regressão Ridge</li>
 </ul>

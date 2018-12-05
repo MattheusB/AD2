@@ -71,7 +71,7 @@ Após entender as variáveis disponíveis, poderemos partir para a resolução d
 
 Para realizar a tunagem das nossas variáveis vamos utilizar validação cruzada. Ou seja, teremos que fazer ums buca para encontrar os melhores valores para que o teste seja melhor. Sendo assim, segue o passo de utilizar validação cruzada:
 
-```{r}
+```{r warning=FALSE}
 controleFit <- trainControl(method = "cv",
                             number = 20,
                             repeats = 20)

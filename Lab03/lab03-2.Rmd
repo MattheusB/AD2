@@ -26,7 +26,7 @@ Logo após, será importado a nossa base de dados, sendo elas: train.csv (conjun
 
 * Remover informações que tem pouca relevância, nome, partido, uf, total_despesa, estado_civil, ocupacao, sexo, grau que iriam demandar um custo elevado de tempo e atrapalhar no processo de tunagem.
 
-```{r}
+```{r warning=FALSE}
 treino <- read.csv("~/Downloads/AD2/Lab03/all/train.csv")
 teste <- read.csv("~/Downloads/AD2/Lab03/all/test.csv")
 
@@ -84,7 +84,7 @@ Antes de partir para as perguntas, é necessário entender o que cada coluna pre
 
 Para responder essa pergunta utilizaremos um gráfico de barras que vai exibir o número de deputados eleitos e não eleitos.
 
-```{r}
+```{r warning=FALSE}
 situacaoParlamentares <-treino %>% 
   group_by(situacao) %>% 
     summarise(total = n())
@@ -98,7 +98,7 @@ situacaoParlamentares %>%
 No gráfico acima, pode-se enxergar que há uma grande discrepância entre o número de canditados eleitos e o número de candidatos não eleitos, ou seja, as classes são desbalanceadas em uma proporção de que o número de candidatos não eleitos é 6 vezes maior que o número de candidatos eleitos. Desse modo, isso pode prejudicar a análise tornando o seu resultado enviezado. Sendo assim, é necessário que haja um balanceamento entre as classes fornecidas. Para isso existem 3 modos eficazes:
 
 * Over
-```{r}
+```{r warning=FALSE}
 treinoOver <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="over")$data
 
 plotOver <- treinoOver %>% 
@@ -114,7 +114,7 @@ plotOver %>%
 Como pode ser visto no gráfico acima o método "over", aumenta o parâmetro que está em menor vigor, elevando o número de candidatos eleitos para 6542.
 
 * Under
-```{r}
+```{r warning=FALSE}
 treinoUnder <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="under")$data
 
 plotUnder <- treinoUnder %>% 
@@ -131,7 +131,7 @@ plotUnder %>%
 Observando o gráfico acima vemos que o "under", diminui o parâmetro que está em maior vigor, diminuindo o número de para 982.
 
 * Both
-```{r}
+```{r warning=FALSE}
 treinoBoth <- ovun.sample(situacao~., data=treino,p=0.5, seed=1,method="both")$data
 
 plotBoth <- treinoBoth %>% 
@@ -152,7 +152,7 @@ Na análise, foi optado por usar o "both", baseado no fato de que se utilizasse 
 
 Para a criação da nossa fórmula, vamos utilizar o modelo "KNN" visto que foi considerado o melhor modelo pelo laboratório anterior da disciplina.
 
-```{r}
+```{r warning=FALSE}
 controleFit <- trainControl(method = "repeatedcv",
                             number = 20,
                             repeats = 20)
@@ -182,7 +182,7 @@ modeloKNN
 * Regressão Logística
 
 A regressão logística é um técnica que utiliza conceitos semelhantes ao modelo de regressão linear, no entanto, ele utiliza a variável dependente é uma variável discreta.
-```{r}
+```{r eval = FALSE}
 regressaoLogistica <- train(formula,
                  data = treinoBoth,
                  method="glm",
@@ -196,7 +196,7 @@ Após observar a regressão logística gerada, pode-se observar que a acurácia 
 * Árvore Decisão
 
 A árvore de decisão é um modelo que gera resultados a partir de parâmetros que demostram se o valor de tal parâmetro leva a um resultado positivo ou negativo. 
-```{r}
+```{r eval = FALSE}
 arvoreDecisao <- train(formula,
                 data= treinoBoth, 
                 method = "rpart",
@@ -210,7 +210,7 @@ O algortmo escolhe a melhor acurácia, e o resultado que obtemos no nosso modelo
 * Adaboost
 
 O adaboost, tem o seu diferencial que é o seu poder de predizer, tomando como base o estudo da predição e o aumento dos pesos das variáveis que tem um maior grau de importância. No entanto, é um modelo que demanda uma parte muito grande de tempo, desse modo, foi decidido que é mais benéfico diminuir o número de variáveis presentes na fórmula utilizada.
-```{r}
+```{r eval = FALSE}
 formulaAdaboost = as.formula(situacao ~ media_receita + quantidade_doacoes)
 
 
@@ -246,7 +246,7 @@ Decidimos analisar cada modelo em particular e tirar conclusões sobre o seu: Pr
 
 * KNN
 
-```{r}
+```{r eval = FALSE}
 treino$predicaoKNN <- predict(modeloKNN, treino)
 
 treinoKNNTP <- treino %>%
@@ -274,7 +274,7 @@ No modelo KNN o nível de precisão foi de aproximadamente apenas 50% o que não
 
 
 * Regressão Logística
-```{r}
+```{r eval = FALSE}
 treino$predicaoRegressao <- predict(regressaoLogistica, treino)
 
 treinoRegressaoTP <- treino %>% 
@@ -301,7 +301,7 @@ treinoRegressaoFMeasure
 Já no modelo de Regressão Logística o nível de precisão foi um pouco maior do que no modelo KNN (60%) o que melhora um pouco. No entanto, o recall obtido na análise baixou para 81%, ou seja, melhorou um pouco mais baixou um pouco também, e por fim o seu F-Measure resultou em cerca de 69%.
 
 * Árvore de decisão
-```{r}
+```{r eval = FALSE}
 treino$predicaoArvore <- predict(arvoreDecisao, treino)
 
 treinoArvoreTP <- treino %>% 
@@ -329,7 +329,7 @@ No modelo de Árvore de decisão o nível de precisão foi de 58% o que indica c
 
 * Adaboost
 
-```{r}
+```{r eval = FALSE}
 treino$predicaoAdaboost <- predict(adaboost, treino)
 
 treinoAdaboostTP <- treino %>% 
@@ -359,23 +359,23 @@ Após observar o resultado obtido, podemos ver uma melhora tendo em vista o mode
 #### 4 - Interprete as saídas dos modelos. Quais atributos parecem ser mais importantes de acordo com cada modelo?
 
 * KNN
-```{r}
+```{r eval = FALSE}
 varImp(modeloKNN)
 ```
 
 
 * Regressao Logística
-```{r}
+```{r eval = FALSE}
 varImp(regressaoLogistica)
 ```
 
 * Árvore de Decisão
-```{r}
+```{r eval = FALSE}
 varImp(arvoreDecisao)
 ```
 
 * Adaboost
-```{r}
+```{r eval = FALSE}
 varImp(adaboost)
 ```
 
@@ -383,7 +383,7 @@ Após a utilização da função varImp (função que lista as variáveis do mod
 
 #### 5 - Envie seus melhores modelos à competição do Kaggle. Faça pelo menos uma submissão. Sugestões para melhorar o modelo:
 
-```{r}
+```{r eval = FALSE}
 regressaoLogisticaKaggle <- train(formula,
                  data = treinoBoth,
                  method="glm",
